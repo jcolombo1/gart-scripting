@@ -13,11 +13,11 @@ println """\
 
                       CAUTION:
      This uninstalling does not delete Extensions 
-        or Artifactsfiles in '/src/gart' folder
+       or Artifacts files in '/src/gart' folder
 
           Do it yourself if it was necessary
 
-               JAC - jcolombo@ymail.com
+              JAC - jcolombo@ymail.com
 
 *********************************************************
 """

@@ -39,7 +39,7 @@ println """\
 
 *********************************************************
 
-                          GART
+                          GArt
 
              Templating Engine of Assemble  
 

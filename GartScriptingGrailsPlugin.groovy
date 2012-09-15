@@ -1,7 +1,7 @@
 class GartScriptingGrailsPlugin {
 	
     // the plugin version
-    def version = "0.1"
+    def version = "0.2"
     // the version or versions of Grails the plugin is designed for
     def grailsVersion = "2.1 > *"
     // the other plugins this plugin depends on
@@ -12,9 +12,9 @@ class GartScriptingGrailsPlugin {
     ]
 
     // TODO Fill in these fields
-    def title = "WET Scripting Plugin" // Headline display name of the plugin
-    def author = "Your name"
-    def authorEmail = ""
+    def title = "GArt Scripting - Templating Engine of Assemble" // Headline display name of the plugin
+    def author = "Jorge Colombo"
+    def authorEmail = "jcolombo@ymail.com"
     def description = '''\
 GArt Scripting - Templating Engine of Assemble - This Grails plugin installs the necessary scripts of engine.
 '''

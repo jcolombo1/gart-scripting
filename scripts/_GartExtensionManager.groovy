@@ -210,7 +210,11 @@ class GartExtensionManager {
 			
 			if (!(file=new File(destDir)).exists()) file.mkdirs()
 			
-			def rec = { id, type='div' -> workMap.reclaimsID << ('{id:"'+id+'",type:"'+type+'"}'); '"'+id+'"' }
+			def rec = { id, type='div' ->
+				def bid = id[0]!='#' ? id : id[1..-1] 
+				workMap.reclaimsID << ('{id:"'+bid+'",type:"'+type+'"}')
+				'"'+id+'"' 
+			}
 			
 			def templateGenerator = new GartTemplateGenerator(classLoader, workMap)
 			templateGenerator.grailsApplication = grailsApp
@@ -312,7 +316,7 @@ class GartExtensionManager {
 	private loadAppProyect() {
 		def file
 		String fn = appProyecFileName  
-		if (!(file=new File(fn).exists())) { fn=fn.replaceFirst(/\.\w+$/,'.js'); file=new File(fn) }   // .json | .js -> both permitted  
+		if (!((file=new File(fn)).exists())) { fn=fn.replaceFirst(/\.\w+$/,'.js'); file=new File(fn) }   // .json | .js -> both permitted  
 		if (file.exists()) {
 			def slurper = new groovy.json.JsonSlurper()
 			appProyect = slurper.parseText( new FileInputStream(file).getText() )[0]

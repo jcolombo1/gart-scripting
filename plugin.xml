@@ -1,7 +1,8 @@
-<plugin name='gart-scripting' version='0.1' grailsVersion='2.1 &gt; *'>
-  <author>Your name</author>
-  <title>WET Scripting Plugin</title>
-  <description>GArt Scripting (Templating Engine of Assemble) - This plugin installs the necessary scripts that manage the operation of the engine assembly GArt.
+<plugin name='gart-scripting' version='0.2' grailsVersion='2.1 &gt; *'>
+  <author>Jorge Colombo</author>
+  <authorEmail>jcolombo@ymail.com</authorEmail>
+  <title>GArt Scripting - Templating Engine of Assemble</title>
+  <description>GArt Scripting - Templating Engine of Assemble - This Grails plugin installs the necessary scripts of engine.
 </description>
   <documentation>http://grails.org/plugin/gart-scripting</documentation>
   <type>GartScriptingGrailsPlugin</type>
