@@ -1,0 +1,93 @@
+<!doctype html>
+<html>
+	<head>
+		<!-- section 50 -->
+	
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		<title>${ME.description}</title>
+		<!-- EMBED HeadIncludes, %REQUIRED -->
+		
+		<!-- section 60 -->
+		
+	</head>
+	<body>
+
+		<h1>${ME.description}</h1>
+
+		<div id="gart-demo" class="accordions">
+
+			<!-- section 100 -->
+						
+			<h3><a href="#">Application Status</a></h3>
+			<div id="application-status">
+				<ul>
+					<li>Groovy version: ${org.codehaus.groovy.runtime.InvokerHelper.getVersion()}</li>
+					<li>JVM version: ${System.getProperty('java.version')}</li>
+					<li>Reloading active: ${grails.util.Environment.reloadingAgentEnabled}</li>
+					<li>Controllers: ${grailsApplication.controllerClasses.size()}</li>
+					<li>Domains: ${grailsApplication.domainClasses.size()}</li>
+					<li>Services: ${grailsApplication.serviceClasses.size()}</li>
+					<li>Procedures: ${GART.design.procedures.size()}</li>
+				</ul>
+			</div>
+
+			<!-- section 200 -->
+			
+			<h3><a href="#">Available Controllers</a></h3>
+			<div id="controller-list">
+				<ul> <% grailsApplication.controllerClasses.sort { it.fullName }.each { %>
+					<li> ${it.logicalPropertyName} - ${it.fullName} </li> <% } %>
+				</ul>
+			</div>
+
+			<!-- section 300 -->
+			
+			<h3><a href="#">Available Procedures</a></h3>
+			<div id="procedure-list">
+				<ul> <% GART.design.procedures.sort { it.key }.each { %>
+					<li> ${it.key} - ${it.value.description} </li> <% } %>
+				</ul>
+			</div>
+
+			<!-- section 400 -->
+
+			<h3><a href="#">Available Model for procedure (${ME.name})</a></h3>
+			<div id="domain-list">
+				<ul><% MODEL.each { %>
+					<li>${it.fullName} have ${it.properties*.name.join(', ')}</li> <% } %>
+				</ul>
+			</div>
+
+			<!-- section 500 -->
+
+			<h3><a href="#">Available ME values (for scripting)</a></h3>
+			<div id="ME-list">
+				<ul> <% ME.sort { it.key }.each { %>
+					<li> ${it.key} = ${it.value} </li> <% } %>
+				</ul>
+			</div>
+
+			<!-- section 600 -->
+
+		</div>
+		
+		<!-- EMBED ElementListTarget -->
+		 
+		<!-- section 900 -->
+	</body>
+
+<!-- section 2000 -->
+
+<script type="text/javascript">	
+<!-- EMBED JSResources, %REQUIRED -->
+<!-- EMBED MakeItemList, %REQUIRED -->
+\$(document).ready(function() {
+	<!-- EMBED DocumentLoad, %REQUIRED -->
+	<!-- section 5000 -->
+});
+<!-- section 6000 -->
+</script>
+<!-- section 9000 -->
+	
+</html>
+		

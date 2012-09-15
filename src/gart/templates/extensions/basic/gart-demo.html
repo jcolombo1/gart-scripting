@@ -1,0 +1,80 @@
+<!-- ##################################################################################################### -->
+<!-- 										EXTENSION GartDemo 											   -->
+<!-- ##################################################################################################### -->
+
+<!-- ===================================================================================================== -->
+<!-- 										INTO HeadIncludes, %ONCE									   -->
+
+	<!-- ASK "JQueryLoc", "JQuery location ref", "cdn" -->
+	<!-- ASK "domain", "Domain Model" -->
+
+<%    
+	def serverUrl = 'http://localhost:8080/' + GART.appName 
+    def dObj = MODEL.get(ASK.domain)  
+    
+	def cdn = 'http://code.jquery.com/jquery-1.7.1.min.js'     , cdn2 = 'http://code.jquery.com/ui/1.8.23/jquery-ui.min.js'
+	def local = GART.path_js + '/jquery/jquery-1.7.1.min.js'   , local2 = GART.path_js + '/jquery/ui/1.8.23/jquery-ui.min.js' 
+	
+	def isDev = grails.util.Environment.current == grails.util.Environment.DEVELOPMENT
+%>
+<script src="${ ASK.JQueryLoc=='cdn' ? cdn : local }"></script>
+<script src="${ ASK.JQueryLoc=='cdn' ? cdn2 : local2 }"></script>
+<style type="text/css">div.hiddenTransientElements {display:none;}</style>
+
+<!-- ENDINTO -->
+
+
+<!-- ===================================================================================================== -->
+<!-- 										INTO MakeItemList 											   -->
+
+	<!-- ASK "col1", "Column 1" -->
+	<!-- ASK "col2", "Column 2" -->
+
+function itemList${dObj.shortName}$EXT(item) {
+	return "<li class='item-list'><span class='item-col1'><strong>" + item.${ASK.col1} + "</strong></span> <span class='item-col2'>" + item.${ASK.col2} +"</span></li>";
+};
+
+var renderList${dObj.shortName}$EXT = function(list) {
+	for ( var i = 0; i < list.length; i++) {
+		\$(<%= REC("#list-items$EXT","ul") %>).append( itemList${dObj.shortName}$EXT(list[i]) );
+	}
+};
+<!-- ENDINTO -->
+
+<!-- ===================================================================================================== -->
+<!-- 										INTO DocumentLoad 											   -->
+
+	<!-- ASK "action", "Items load action", "list" -->
+	
+ajaxGet( '${serverUrl}/${dObj.propertyName}/${ASK.action}', renderList${dObj.shortName}$EXT );
+
+<!-- ENDINTO -->
+
+<!-- ===================================================================================================== -->
+<!-- 										INTO DocumentLoad, %ONCE 									   -->
+
+	<!-- ASK "accordion", "Use jQuery Accordion?", "true" -->
+	
+<% if(ASK.accordion) { %>\$(".accordions").accordion({autoHeight: false, navigation: true}); <% } %>
+
+<!-- ENDINTO -->
+
+
+<!-- ===================================================================================================== -->
+<!-- 										INTO JSResources, %ONCE										   -->
+
+function ajaxGet(url,handler) {
+	\$.ajax({
+		cache : false,
+		type : "GET",
+		async : false,
+		dataType : "json",
+		url : url,
+		success : function(data) { handler(data); },
+		error : function(xhr) { alert(xhr.responseText); }
+	});
+}
+
+<!-- ENDINTO -->
+
+<!-- ENDEXTENSION -->

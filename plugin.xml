@@ -1,0 +1,21 @@
+<plugin name='gart-scripting' version='0.1' grailsVersion='2.1 &gt; *'>
+  <author>Your name</author>
+  <title>WET Scripting Plugin</title>
+  <description>GArt Scripting (Templating Engine of Assemble) - This plugin installs the necessary scripts that manage the operation of the engine assembly GArt.
+</description>
+  <documentation>http://grails.org/plugin/gart-scripting</documentation>
+  <type>GartScriptingGrailsPlugin</type>
+  <resources>
+    <resource>gart.demo.GartDemoController</resource>
+    <resource>gart.demo.GartDemo</resource>
+  </resources>
+  <repositories>
+    <repository name='grailsCentral' url='http://grails.org/plugins' />
+    <repository name='http://repo.grails.org/grails/core' url='http://repo.grails.org/grails/core/' />
+    <repository name='mavenCentral' url='http://repo1.maven.org/maven2/' />
+  </repositories>
+  <dependencies />
+  <plugins />
+  <runtimePluginRequirements />
+  <behavior />
+</plugin>

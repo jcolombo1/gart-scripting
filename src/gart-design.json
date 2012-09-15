@@ -1,0 +1,75 @@
+
+
+[
+  {
+    "procedures": {
+      "EmptyProcedure": {
+        "description": "Still not defined",
+        "history": {
+          "milestone": 1,
+          "date": "2012-09-06T18:18:00Z"
+        }
+      },
+      "Index": {
+        "description": "Welcome to GArt Plugin demo",
+        "sufixName": "",
+        "relPath": "",
+        "artefacts": {
+          "basic/gart-index.html": {
+            "extensions": [
+              {
+                "name": "basic.gart-demo:GartDemo",
+                "priority": 1,
+                "domains": {
+                  "gartDemo": "gart.demo.GartDemo"
+                },
+                "intos": {
+                  "HeadIncludes": {
+                    "asks": {
+                      "JQueryLoc": "cdn",
+                      "instance": 1,
+                      "domain": "gart.demo.GartDemo"
+                    }
+                  },
+                  "MakeItemList": {
+                    "asks": {
+                      "col1": "name",
+                      "col2": "email"
+                    }
+                  }
+                }
+              },
+              {
+                "name": "basic.gart-demo:GartDemo",
+                "priority": 2,
+                "domains": {
+                  "gartDemo": "gart.demo.GartDemo"
+                },
+                "intos": {
+                  "HeadIncludes": {
+                    "asks": {
+                      "JQueryLoc": "cdn",
+                      "instance": 1,
+                      "domain": "gart.demo.GartDemo"
+                    }
+                  },
+                  "MakeItemList": {
+                    "asks": {
+                      "col1": "email",
+                      "col2": "name"
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "history": {
+          "milestone": 1,
+          "date": "2012-09-06T18:18:00Z"
+        }
+      }
+    }
+  }
+]
+
