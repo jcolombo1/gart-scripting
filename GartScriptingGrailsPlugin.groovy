@@ -16,7 +16,7 @@ class GartScriptingGrailsPlugin {
     def author = "Your name"
     def authorEmail = ""
     def description = '''\
-GArt Scripting (Templating Engine of Assemble) - This plugin installs the necessary scripts that manage the operation of the engine assembly GArt.
+GArt Scripting - Templating Engine of Assemble - This Grails plugin installs the necessary scripts of engine.
 '''
 
     // URL to the plugin's documentation
