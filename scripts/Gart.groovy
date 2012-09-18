@@ -10,8 +10,8 @@ import org.codehaus.groovy.grails.scaffolding.*    // IMPORTANT !!
 includeTargets << grailsScript("_GrailsBootstrap")
 includeTargets << grailsScript("_GrailsInit")
 
-includeTargets << new File("${gartScriptingPluginDir}/scripts/_GartExtensionManager.groovy")
 includeTargets << new File("${gartScriptingPluginDir}/scripts/_GartTemplateGenerator.groovy")
+includeTargets << new File("${gartScriptingPluginDir}/scripts/_GartExtensionManager.groovy")
 
 def iam = "GArt"
 
@@ -28,14 +28,10 @@ gartEM = null
 
 target(gartRun: "Generates Procedure artefacts") {
 
-	//depends(checkVersion, parseArguments, packageApp)
+	depends(checkVersion, parseArguments, loadApp, createGartEM )
 	
-	depends(loadApp, compile, createGartEM)
-
 	def name = argsMap["params"][0]
 
-	gartEM = GartExtensionManager.getInstance()
-	
 	if ( ! gartEM.getProcedureNames(false).contains(name) ) {
 		def result = [ error: "Procedure '$name' not found!\n"+ help() , exit: 1 ]
 		displayResult(result)

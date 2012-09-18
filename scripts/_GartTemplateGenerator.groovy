@@ -1,8 +1,15 @@
 import groovy.text.SimpleTemplateEngine;
-
 import org.codehaus.groovy.grails.commons.GrailsDomainClass;
 import org.codehaus.groovy.grails.scaffolding.DefaultGrailsTemplateGenerator
 //import org.springframework.core.io.AbstractResource
+
+
+// ------------------------------------------------------------------------------------------
+
+
+target(intiGartTG: "NONE") { }
+
+setDefaultTarget(intiGartTG)
 
 class GartTemplateGenerator extends DefaultGrailsTemplateGenerator {
 	
@@ -47,7 +54,7 @@ class GartTemplateGenerator extends DefaultGrailsTemplateGenerator {
 					multiPart: multiPart,
 					className: domainClass?.shortName,
 					propertyName:  domainClass ? getPropName(domainClass) : '' ,
-					renderEditor: renderEditor,
+					//renderEditor: renderEditor,
 					MODEL:domainModel
 			]
 

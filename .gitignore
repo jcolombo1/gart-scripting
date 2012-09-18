@@ -3,7 +3,7 @@
 #################
 target
 *.log
-*.zip
+##  *.zip
 *.tld
 plugin.xml
 target/
