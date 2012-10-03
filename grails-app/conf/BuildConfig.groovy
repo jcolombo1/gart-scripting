@@ -24,13 +24,28 @@ grails.project.dependency.resolution = {
         // specify dependencies here under either 'build', 'compile', 'runtime', 'test' or 'provided' scopes eg.
 
         // runtime 'mysql:mysql-connector-java:5.1.18'
+		provided ( "org.codehaus.groovy.modules.http-builder:http-builder:0.5.1" ) {
+			excludes "commons-logging", "xml-apis", "groovy"
+		}	
     }
 
+//	dependencies {
+//		runtime('org.codehaus.groovy.modules.http-builder:http-builder:0.5.1') {
+//			excludes 'xalan'
+//			excludes 'xml-apis'
+//			excludes 'groovy'
+//		}
+//	}
+
+	
+	
     plugins {
         build(":tomcat:$grailsVersion",
-              ":release:2.0.3",
-              ":rest-client-builder:1.0.2") {
+              ":release:2.0.3") {
             export = false
         }
+		compile ":rest-client-builder:1.0.2"
     }
+	
+	
 }

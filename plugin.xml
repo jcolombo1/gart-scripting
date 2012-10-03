@@ -1,4 +1,4 @@
-<plugin name='gart-scripting' version='0.3' grailsVersion='2.1 &gt; *'>
+<plugin name='gart-scripting' version='0.3.2' grailsVersion='2.1 &gt; *'>
   <author>Jorge Colombo</author>
   <authorEmail>jcolombo@ymail.com</authorEmail>
   <title>GArt Scripting - Templating Engine of Assemble</title>
@@ -14,9 +14,12 @@
     <repository name='grailsCentral' url='http://grails.org/plugins' />
     <repository name='http://repo.grails.org/grails/core' url='http://repo.grails.org/grails/core/' />
     <repository name='mavenCentral' url='http://repo1.maven.org/maven2/' />
+    <repository name='Codehaus' url='http://repository.codehaus.org/' />
   </repositories>
   <dependencies />
   <plugins />
-  <runtimePluginRequirements />
+  <runtimePluginRequirements>
+    <plugin name='rest' version='* &gt; 0.6' />
+  </runtimePluginRequirements>
   <behavior />
 </plugin>

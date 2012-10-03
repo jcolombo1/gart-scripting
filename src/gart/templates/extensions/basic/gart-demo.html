@@ -9,7 +9,6 @@
 	<!-- ASK "domain", "Domain Model" -->
 
 <%    
-	def serverUrl = 'http://localhost:8080/' + GART.appName 
     def dObj = MODEL.get(ASK.domain)  
     
 	def cdn = 'http://code.jquery.com/jquery-1.7.1.min.js'     , cdn2 = 'http://code.jquery.com/ui/1.8.23/jquery-ui.min.js'
@@ -45,7 +44,7 @@ var renderList${dObj.shortName}$EXT = function(list) {
 
 	<!-- ASK "action", "Items load action", "list" -->
 	
-ajaxGet( '${serverUrl}/${dObj.propertyName}/${ASK.action}', renderList${dObj.shortName}$EXT );
+ajaxGet( appURL+'/${dObj.propertyName}/${ASK.action}', renderList${dObj.shortName}$EXT );
 
 <!-- ENDINTO -->
 
@@ -55,6 +54,8 @@ ajaxGet( '${serverUrl}/${dObj.propertyName}/${ASK.action}', renderList${dObj.sho
 	<!-- ASK "accordion", "Use jQuery Accordion?", "true" -->
 	
 <% if(ASK.accordion) { %>\$(".accordions").accordion({autoHeight: false, navigation: true}); <% } %>
+
+\$('h1:first').text(\$('h1:first').text()+' in '+appURL);
 
 <!-- ENDINTO -->
 
@@ -73,7 +74,8 @@ function ajaxGet(url,handler) {
 		error : function(xhr) { alert(xhr.responseText); }
 	});
 }
-
+var serverURL = location.protocol +'//'+ location.hostname + (location.port!=80?':'+location.port:'');
+var appURL = serverURL + '/${GART.appName}';
 <!-- ENDINTO -->
 
 <!-- ENDEXTENSION -->

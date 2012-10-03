@@ -10,6 +10,7 @@ import org.codehaus.groovy.grails.scaffolding.*    // IMPORTANT !!
 includeTargets << grailsScript("_GrailsBootstrap")
 includeTargets << grailsScript("_GrailsInit")
 
+includeTargets << new File("${gartScriptingPluginDir}/scripts/_GartCloudHelper.groovy")
 includeTargets << new File("${gartScriptingPluginDir}/scripts/_GartTemplateGenerator.groovy")
 includeTargets << new File("${gartScriptingPluginDir}/scripts/_GartExtensionManager.groovy")
 
@@ -30,17 +31,27 @@ target(gartRun: "Generates Procedure artefacts") {
 
 	depends(checkVersion, parseArguments, loadApp, createGartEM )
 	
-	def name = argsMap["params"][0]
+	if (!gartEM.haveError()) {
 
-	if ( ! gartEM.getProcedureNames(false).contains(name) ) {
-		def result = [ error: "Procedure '$name' not found!\n"+ help() , exit: 1 ]
-		displayResult(result)
-	}
+		gartEM.classLoader = classLoader
+		gartEM.pluginManager = pluginManager
 
-	gartEM.classLoader = classLoader
-	gartEM.pluginManager = pluginManager
+		def name = argsMap["params"][0]
+		
+		if (name=='ide') {
+			depends send2Cloud
+			return
+		}
 	
-	gartEM.assembleProcedure(name)
+		depends check2Cloud
+		
+		if ( ! gartEM.getProcedureNames(false).contains(name) ) {
+			def result = [ error: "Procedure '$name' not found!\n"+ help() , exit: 1 ]
+			displayResult(result)
+		}
+	
+		gartEM.assembleProcedure(name)
+	}
 	
 	displayResult(gartEM.getWorkResult())
 	
@@ -55,7 +66,7 @@ displayResult = { result ->
 		if ( result.error )
 			event 'StatusError', [ "$iam : " + result.error ]
 		else
-			event 'StatusFinal', [ "$iam : "+ result.success ]
+			event 'StatusFinal', [ "$iam : "+ result.success + (result.lap?" in ${result.lap} segs.":'') ]
 			
 		if (result.exit)
 			exit result.exit

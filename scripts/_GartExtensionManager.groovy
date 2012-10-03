@@ -15,12 +15,14 @@ grailsApp = null
 
 target(createGartEM: "Create Gart Extension Manager instance") {
 	
-	gartEM = GartExtensionManager.getInstance("$basedir")	// setting basedir for load Extension Files
+	if (gartEM) return
+	
 	if (!grailsApp) {
 		event 'StatusError', ["Before 'GartExtensionManager.getInstance' you must initialize scripting scope (grailsApplication not setted)"]
 		exit 1
 	}
-	gartEM.grailsApp = grailsApp
+	
+	gartEM = GartExtensionManager.getInstance(grailsApp, "$basedir")	// setting basedir for load Extension Files
 	 
 }
 
@@ -31,14 +33,13 @@ setDefaultTarget(createGartEM)
 // ------------------------------------------------------------------------------------------
 
 class GartExtensionManager {
-	
 	private static GartExtensionManager me 
 	protected static extensionsFolderName = 'extensions'
 	protected static artefactsFolderName = 'artefacts'
 	protected static extensionsPath = "src/gart/templates/$extensionsFolderName"
 	protected static artefactsPath = "src/gart/templates/$artefactsFolderName"
-	//protected static webDesignPath = "src/web"
 	static appProyecFileName = 'src/gart-design.json' 
+//	static appProyecFileName = 'src/gart-xxxxxx.json' 
 	static baseDir
 	
 	boolean loadedFiles
@@ -52,13 +53,18 @@ class GartExtensionManager {
 	def classLoader
 	def pluginManager
 	
-	GartExtensionManager(String baseDirectory=null) {  
+	GartExtensionManager(grailsApplication, String baseDirectory=null) {
+		grailsApp = grailsApplication  
 		if (baseDirectory) loadExtensionFiles(baseDirectory)  
 	}
 	
-	static synchronized GartExtensionManager getInstance(baseDirectory) {
-		if (!me) me = new GartExtensionManager(baseDirectory)
+	static synchronized GartExtensionManager getInstance(grailsApplication, baseDirectory) {
+		if (!me) me = new GartExtensionManager(grailsApplication, baseDirectory)
 		me
+	}
+	
+	def haveError() {
+		(workMap.errors.size() > 0)
 	}
 	
 	def loadExtensionFiles(baseDirectory, boolean compile = false) { 
@@ -128,7 +134,8 @@ class GartExtensionManager {
 	}
 	
 	def getModelForProcedure(procedure) {
-		def modelNames = [], model = []
+		LinkedHashSet modelNames = []   // no Dups! 
+		def model = []
 		procedure.artefacts?.each { it.value?.extensions?.each { _drill4m(modelNames,it) } }
 		modelNames.each {  
 			def domain = it.indexOf('.') > 0 ? it : GrailsNameUtils.getClassNameRepresentation(it)
@@ -152,7 +159,7 @@ class GartExtensionManager {
 		
 		procedure.artefacts?.entrySet().sort{ (it.value.priority?:0) }.each {    // artefacts Map - order by artefact.priority if indicated
 			
-			def templateViewName = it.key 
+			def templateViewName = it.key.replace('|','.') 
 			def tfile = templateViewName.substring(templateViewName.lastIndexOf('.')+1).toLowerCase();
 			def path_js = "/js${relPath}"
 			def path_css = "/css${relPath}"
@@ -215,7 +222,7 @@ class GartExtensionManager {
 				workMap.reclaimsID << ('{id:"'+bid+'",type:"'+type+'"}')
 				'"'+id+'"' 
 			}
-			
+
 			def templateGenerator = new GartTemplateGenerator(classLoader, workMap)
 			templateGenerator.grailsApplication = grailsApp
 			templateGenerator.pluginManager = pluginManager
@@ -260,7 +267,7 @@ class GartExtensionManager {
 		try {
 			extsList.sort{ (it.priority?:0) }.each { proj_ext ->
 				def ext = getExtension( proj_ext.name, workMap.tfile )
-				if (!ext) { workMap.errors << "extension '${proj_ext.name}.${workMap.tfile}' not found!" }
+				if (!ext) { workMap.errors << "extension '${proj_ext.name}|${workMap.tfile}' not found!" }
 				else if (ext.errors?.size()>0) { workMap.errors.addAll ext.errors }
 				else {
 					proj_ext.instance = proj_ext.instance ?: ( ++workMap.extInstanceNum > 1 ? "_${workMap.extInstanceNum}" : '') // tail from "_2" (_2..n) 
@@ -307,25 +314,59 @@ class GartExtensionManager {
 	}
 	
 	private getExtension(String name, String tfile) {
-		def ext = extensions.get( "${name}.${tfile}" )  // compound key eg: "basic.SampleEmbed:MyEmbed.js"
+		def ext = extensions.get( "${name}|${tfile}" )  // compound key eg: "basic.SampleEmbed:MyEmbed|js"
 		if (ext) return ext
 		try { extensionFiles[(name.split(/:/)[0])]."${tfile}".compile() } catch (e) {  }  // compile on-demand
-		return extensions.get( "${name}.${tfile}" )
+		return extensions.get( "${name}|${tfile}" )
 	}
 		
 	private loadAppProyect() {
-		def file
-		String fn = appProyecFileName  
-		if (!((file=new File(fn)).exists())) { fn=fn.replaceFirst(/\.\w+$/,'.js'); file=new File(fn) }   // .json | .js -> both permitted  
-		if (file.exists()) {
+		def file = new File(appProyecFileName)
+		if (!file.exists()) {
+			appProyect = [ pid: 0, procedures: [:], history:[ milestone: 0, date: new Date() ] ] 
+			//println appProyect
+			def builder = new groovy.json.JsonBuilder()
+			builder.setContent(appProyect)
+			file.withWriter { Writer writer -> writer.write( builder.toString() ) }
+		} else {	
 			def slurper = new groovy.json.JsonSlurper()
-			appProyect = slurper.parseText( new FileInputStream(file).getText() )[0]
-//			def builder = new groovy.json.JsonBuilder()
-//			builder.setContent(appProyect)
-//			println builder.toString()
+			appProyect = slurper.parseText( new FileInputStream(file).getText() ) 
+			if (!(appProyect instanceof Map)) { workMap.errors << "Structure of directives file '${file.name}' is invalid (should be Map)." ; return } 
 		}
 	}
 
+	Map getProjectJSON(boolean full = false) {
+		if (!loadedFiles) return [:]
+		def gm = grailsApp.metadata, gv = pluginManager.getGrailsPlugin('gart-scripting').version
+		def doms = [:], proj = [ procedures: [:], pid: appProyect.pid, history: appProyect.history  ]
+		if (full) {
+			proj = appProyect
+			grailsApp.domainClasses.sort{ it.propertyName }.each { doms << [ (it.propertyName): it.fullName ] }
+		} 
+		def maps = [
+			application: [ gartV: gv, name: gm.get('app.name'), version: gm.get('app.version'), description: gm.get('app.description'), grailsV: gm.get('app.grails.version'), javaV: System.getProperty('java.version'), servletV: gm.get('app.servlet.version') ] ,
+			domains: doms ,
+		] << proj
+		maps
+	}
+
+//	String getProjectJsonString(boolean full = false) {
+//		if (!loadedFiles) return ''
+//		def gm = grailsApp.metadata, gv = pluginManager.getGrailsPlugin('gart-scripting').version
+//		def doms = [:], proj = [procedures: [:], pid: appProyect.pid ]
+//		if (full) {
+//			proj = appProyect
+//			grailsApp.domainClasses.sort{ it.propertyName }.each { doms << [ (it.propertyName): it.fullName ] }
+//		}	
+//		def maps = [
+//			application: [ gartV: gv, name: gm.get('app.name'), version: gm.get('app.version'), description: gm.get('app.description'), grailsV: gm.get('app.grails.version'), javaV: System.getProperty('java.version'), servletV: gm.get('app.servlet.version'), history:  [ milestone: 0, date: new Date() ] ] ,
+//			domains: doms ,
+//		] << proj
+//		def builder = new groovy.json.JsonBuilder()
+//		builder.setContent(maps)
+//		builder.toString()
+//	}
+	
 	def printWorkResult() {
 		def res = getWorkResult()
 		if (res.error) println res.error else if (res.success) println res.success
@@ -364,7 +405,7 @@ class GartExtensionManager {
 		println "*"*80
 		extensionsByInto.each {
 			println "Extensions for INTO: ${it.key}"
-			it.value.each { e -> println "  ${e.ns}.${e.fileType}" }
+			it.value.each { e -> println "  ${e.ns}|${e.fileType}" }
 			println ""
 		}
 		println "*"*80
@@ -427,9 +468,9 @@ class ExtensionFile {
 					}
 				}
 			} else {
-				extension.errors << "EXTENSION '${extension.ns}.${extension.fileType}' do not have INTO's, should have at least one!"
+				extension.errors << "EXTENSION '${extension.ns}|${extension.fileType}' do not have INTO's, should have at least one!"
 			}
-			eMan.extensions.put "${ext_ns}.${fileType}", extension  
+			eMan.extensions.put "${ext_ns}|${fileType}", extension  
 		}
 		compiled = true
 	}
@@ -445,7 +486,7 @@ class ExtensionFile {
 					asksList << x
 					last = it.split(/-->/)[1..-1].join("-->") 
 				}else{
-				 	extension.errors << "ASK invalid in extension ${extension.ns}.${extension.fileType} $txtOnErr"
+				 	extension.errors << "ASK invalid in extension ${extension.ns}|${extension.fileType} $txtOnErr"
 				}  
 				  
 			}
@@ -461,12 +502,14 @@ class ExtensionFile {
 // wrapper to list model to get by name (any: short or prop name) 
 
 class Model extends LinkedList {
-	Model(List c) { super(c) }
+	Model(Collection c) { super(c) }
 	def get(String n) {
-		def rv, ite=iterator() 
+		def rv, ite=iterator(), full=n.indexOf('.')>0?true:false 
 		while (ite.hasNext()) {
 			def x=ite.next()
-			if(x.shortName||x.propertyName) {rv=x; break;} 
+			//println x.fullName +"    "+ x.shortName +"  "+ x.propertyName + "   "+ n
+			if(full) { if(x.fullName==n) {rv=x; break;} } 
+			else { if(x.shortName==n||x.propertyName==n) {rv=x; break;} } 
 		}
 		return rv
 	} 

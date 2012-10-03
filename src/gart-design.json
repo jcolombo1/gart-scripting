@@ -1,21 +1,23 @@
 
 
-[
+
   {
+  	"pid" : 5487,
     "procedures": {
       "EmptyProcedure": {
         "description": "Still not defined",
         "history": {
-          "milestone": 1,
-          "date": "2012-09-06T18:18:00Z"
-        }
+          "milestone": 3,
+          "date": "2012-09-04T14:36:03Z"
+        },
+        "priority": 1
       },
       "Index": {
         "description": "Welcome to GArt Plugin demo",
         "sufixName": "",
         "relPath": "",
         "artefacts": {
-          "basic/gart-index.html": {
+          "basic/gart-index|html": {
             "extensions": [
               {
                 "name": "basic.gart-demo:GartDemo",
@@ -55,21 +57,23 @@
                   },
                   "MakeItemList": {
                     "asks": {
-                      "col1": "email",
-                      "col2": "name"
+                      "col1": "name",
+                      "col2": "email"
                     }
                   }
                 }
               }
-            ]
+            ],
+            "priority": 0
           }
         },
         "history": {
-          "milestone": 1,
-          "date": "2012-09-06T18:18:00Z"
-        }
+          "milestone": 3,
+          "date": "2012-09-04T14:36:03Z"
+        },
+        "priority": 0
       }
     }
   }
-]
+
 

@@ -1,6 +1,7 @@
 package gart.demo
 
 import grails.util.Environment
+
 import grails.converters.JSON
 import grails.validation.ValidationErrors
 import groovy.json.JsonBuilder;
@@ -49,70 +50,4 @@ class GartDemoController {
 		}
 	}
 	
-//    def save() {
-//      def jsonObject = JSON.parse(params.gartdemo)
-//      GartDemo gartdemoInstance = new GartDemo(jsonObject)
-//      if (!gartdemoInstance.save(flush: true)) {
-//        ValidationErrors validationErrors = gartdemoInstance.errors
-//        render validationErrors as JSON
-//      }
-//      render gartdemoInstance as JSON
-//    }
-//    
-//    def show() {
-//      def gartdemoInstance = GartDemo.get(params.id)
-//      if (!gartdemoInstance) {
-//        flash.message = message(code: 'default.not.found.message', args: [message(code: 'gartdemo.label', default: 'GartDemo'), params.id])
-//        render flash as JSON
-//      }
-//      render GartDemoInstance as JSON
-//    }
-//
-//    def update() {
-//      def jsonObject = JSON.parse(params.gartdemo)
-//      GartDemo gartdemoReceived = new GartDemo(jsonObject)
-//
-//        def gartdemoInstance = GartDemo.get(jsonObject.id)
-//        if (!gartdemoInstance) {
-//            flash.message = message(code: 'default.not.found.message', args: [message(code: 'gartdemo.label', default: 'GartDemo'), params.id])
-//            render flash as JSON
-//        }
-//
-//        if (jsonObject.version) {
-//          def version = jsonObject.version.toLong()
-//          if (gartdemoInstance.version > version) {
-//            gartdemoInstance.errors.rejectValue("version", "default.optimistic.locking.failure",
-//                          [message(code: 'gartdemo.label', default: 'GartDemo')] as Object[],
-//                          "Another user has updated this GartDemo while you were editing")
-//                ValidationErrors validationErrors = gartdemoInstance.errors
-//                render validationErrors as JSON
-//                return
-//            }
-//        }
-//
-//        gartdemoInstance.properties = gartdemoReceived.properties
-//
-//        if (!gartdemoInstance.save(flush: true)) {
-//          ValidationErrors validationErrors = gartdemoInstance.errors
-//          render validationErrors as JSON
-//        }
-//		    render gartdemoInstance as JSON
-//    }
-//
-//    def delete() {
-//      def gartdemoId = params.id
-//      def gartdemoInstance = GartDemo.get(params.id)
-//      if (!gartdemoInstance) {
-//        flash.message = message(code: 'default.not.found.message', args: [message(code: 'gartdemo.label', default: 'GartDemo'), params.id])
-//        render flash as JSON
-//      }
-//      try {
-//            gartdemoInstance.delete(flush: true)
-//      }
-//      catch (DataIntegrityViolationException e) {
-//        flash.message = message(code: 'default.not.deleted.message', args: [message(code: 'gartdemo.label', default: 'GartDemo'), params.id])
-//        render flash as JSON
-//      }
-//      render gartdemoInstance as JSON
-//    }
 }
