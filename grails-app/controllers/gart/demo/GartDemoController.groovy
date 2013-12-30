@@ -22,8 +22,14 @@ class GartDemoController {
 	
     def list() {
 		demoInit()
+		println params
 		params.max = Math.min(params.max ? params.int('max') : 10, 100)
-		render(contentType: "text/json") { GartDemo.list(params) }
+		def cbk = params['callback']
+		def rv = ( GartDemo.list(params) as JSON )
+		println " ----> "+rv
+		if (cbk) rv = cbk+'('+ rv +')' 
+		//render(contentType: "text/json") { GartDemo.list(params) }
+		render rv
     }
 	
 	

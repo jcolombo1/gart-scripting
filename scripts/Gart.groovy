@@ -63,11 +63,14 @@ setDefaultTarget(gartRun)
 
 displayResult = { result ->
 	if (result) {
-		if ( result.error )
+		if ( result.error ) {
 			event 'StatusError', [ "$iam : " + result.error ]
-		else
+			if (result.confirm && isInteractive && confirmInput(result.confirm,"confirm.message")) result << [exit:null, success:'.']
+			//input = grailsConsole.userInput("Overwrite ${confirmText}?", ["y","n","a"] as String[])
+		} else {
 			event 'StatusFinal', [ "$iam : "+ result.success + (result.lap?" in ${result.lap} segs.":'') ]
-			
+		}
+		
 		if (result.exit)
 			exit result.exit
 	}

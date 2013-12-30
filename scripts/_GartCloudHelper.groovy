@@ -14,14 +14,11 @@ magicLinkLeyend = "Server running. Browse to "  // strictly!! (fixed in Eclipse 
 
 // --------------------------------------------------------------------------------------------------------------------
 
-target(check2Cloud: "The description of the script goes here!" ) {
+target(check2Cloud: "Check for Sync" ) {
 	
-
 	depends ( createGartEM )
 	
-	def result = doREST( op: "check" )
-
-	displayResult(result)
+	doREST( op: "check" )
 
 }
 
@@ -29,13 +26,11 @@ setDefaultTarget(check2Cloud)
 
 // -------------------------------------------------------------------------------------
 
-target(send2Cloud: "The description of the script goes here!") {
+target(send2Cloud: "Sync & access to GArt-IDE") {
 
 	depends ( createGartEM )
 	
 	def result = doREST( op: "ide", full: true )
-
-	displayResult(result)
 
 	if (result.success) displayResult( [success: "\n\nGArt IDE ${magicLinkLeyend}${result.link}" ] )
 
@@ -44,39 +39,51 @@ target(send2Cloud: "The description of the script goes here!") {
 // --------------------------------------------------------------------------------------------------------------------
 
 doREST = { args ->
+	
 	def clk = System.currentTimeMillis()
-	def gartHost = 'http://localhost:8090/gart-ide'
-	def (gartUser,gartPass) = (System.getenv("GART_AUTH")?:"demoUser:demoPass").split(':')
-	def projectId = gartEM.appProyect['pid'] ? gartEM.appProyect['pid'] : 0
-	if ( (argsMap["params"][1]?:'')=='update' && projectId==0) args.op = 'update'  
-	boolean full = args?.full ? args.full : false
+	def confirm = '... Even so, do you want to continue? (Note: may be out of sync between local project and Gart-IDE) : '
+	def gartHost = grailsSettings.config.grails.gart.host ?: ( System.getenv("GART_HOST") ?: 'http://gart-ide.cloudfoundry.com' ) 
+	def (gartUser,gartPass) = grailsSettings.config.grails.gart.authentication ?: (System.getenv("GART_AUTH")?:"demoUser:demoPass").split(':')
+
+	def projectId = gartEM.appProyect['id'] ? gartEM.appProyect['id'] : 0
+	if ( (argsMap["params"][1]?:'')=='update' && projectId!=0) args.op = 'update'
+	boolean full = (args.full || args.op=='update') ? true : false
 	def result = [:]
-	restURL = "${gartHost}/rest/${gartUser}/${projectId}/${args.op}"
-    def http = new HTTPBuilder(restURL)
-    http.auth.basic gartUser, gartPass
-	try {
-		http.request(POST, groovyx.net.http.ContentType.JSON) { req ->
-			body = gartEM.getProjectJSON(full)
-			response.success = { resp, json ->
-				result.json = json
-				if (json.error) {
-					result = [ error: json.error , exit: 1 ]
-				} else {
-					result.link = "${gartHost}/project/show/" + ( json.newId ?: projectId )
-					result.success = json.success 
-					if (json.upgrade) result = doUpgrade(json) << [link: result.link]
-					result.lap = String.format("%-5.1f", (System.currentTimeMillis()-clk)/1000 )
+	def projectBody = gartEM.getProjectJSON(full)
+	if (!gartEM.haveError()) {
+		def link = "${gartHost}/project"
+		restURL = "${gartHost}/rest/${gartUser}/${projectId}/${args.op}"
+		println "$gartUser : $gartPass - $restURL"
+		def http = new HTTPBuilder(restURL)
+		http.auth.basic gartUser, gartPass
+		try {
+			http.request(POST, groovyx.net.http.ContentType.JSON) { req ->
+				body = projectBody
+				response.success = { resp, json ->
+					result.json = json
+					if (json.error) {
+						result = [ error: json.error , exit: 1 ]
+					} else {
+						link = "${gartHost}/project/show/" + ( json.newId ?: projectId )
+						result.success = json.success
+						if (json.upgrade) result = doUpgrade(json)
+						result.lap = String.format("%-5.1f", (System.currentTimeMillis()-clk)/1000 )
+						result << [link: link]
+					}
 				}
+				response.'401' = { resp -> 	result = [ error: "Authentication failed. Are your username and password correct? (try again or must set settings.groovy)", exit: 1 ]	}
+				response.'403' = { resp -> 	result = [ error: "You don't have GArt'permission (try accessing by web)", exit: 1 ] }
+				response.failure = { resp, json -> result = [ error: "Connection for ${args.op} failed - status ${resp.status} - ${json.message}", confirm: confirm, link: link ] }
 			}
-			response.'401' = { resp -> 	result = [ error: "GArt authentication failed. Are your username and password correct? (set env. variable GART_AUTH=username:password)", exit: 1 ]	}
-			response.'403' = { resp -> 	result = [ error: "You do not have permission in GArt", exit: 1 ] }
-			response.failure = { resp, json -> result = [ error: "Connection for ${args.op} failed - status ${resp.status} - ${json.message}", exit: 1 ] }
+		} catch (e) {
+			println e
+			result = [ error: "No connection is achieved to GArt-IDE. Check your Internet access connection, or try again later.", confirm: confirm, link: link ]
 		}
-	} catch (org.apache.http.conn.HttpHostConnectException e) {
-		result = [ error: "No connection is achieved with the application IDE. Check your Internet access connection, or try again later.", exit: 1 ]
-	} catch (e) {
-		result = [ error: "ERROR: $e", exit: 1 ]
+	} else {
+		result = gartEM.getWorkResult()
 	}
+	
+	displayResult(result)
 	result
 }
 
@@ -84,7 +91,7 @@ doREST = { args ->
 
 doUpgrade = { json ->
 	def file = new File(gartEM.appProyecFileName)
-	file.withWriter { Writer writer -> writer.write( json.data.toString() ) }
+	file.withWriter('UTF-8') { Writer writer -> writer.write( json.data.toString() ) }
 	gartEM.loadAppProyect()
 	if (!gartEM.haveError()) {
 		if (json.newId) 

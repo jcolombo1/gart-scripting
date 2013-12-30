@@ -1,6 +1,7 @@
 import groovy.text.SimpleTemplateEngine;
 import org.codehaus.groovy.grails.commons.GrailsDomainClass;
 import org.codehaus.groovy.grails.scaffolding.DefaultGrailsTemplateGenerator
+import org.codehaus.groovy.control.CompilationFailedException
 //import org.springframework.core.io.AbstractResource
 
 
@@ -34,7 +35,7 @@ class GartTemplateGenerator extends DefaultGrailsTemplateGenerator {
 		generate( domainModel )
 		
 		if ( workMap.errors.size() == 0 ) 
-			destFile.withWriter { Writer writer -> writer.write( newContentFile ) }
+			destFile.withWriter('UTF-8') { Writer writer -> writer.write( newContentFile ) }
 	}
 
 	void generate(List domainModel) {
@@ -58,9 +59,14 @@ class GartTemplateGenerator extends DefaultGrailsTemplateGenerator {
 					MODEL:domainModel
 			]
 
-			if (beforeMakeFile) beforeMakeFile( binding ) // to append bindings from caller
+			if (beforeMakeFile) beforeMakeFile( binding ) // to append other bindings from caller
 			  
-			newContentFile = t.make(binding).toString()	// make target file content
+			try {
+				newContentFile = t.make(binding).toString()	// make target file content
+			} catch (e) {
+				workMap.errors << ("Compiler Error >> "+ e.message)
+				return
+			}	
 			
 			if ( workMap.tfile == 'html' && workMap.reclaimsID.size() > 0 ) {
 				def fd = newContentFile.find("</[hH][tT][mM][lL]>")
